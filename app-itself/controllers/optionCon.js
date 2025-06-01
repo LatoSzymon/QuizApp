@@ -2,23 +2,24 @@ const Option = require("../models/options");
 
 const addOption = async (req, res) => {
     try {
-        const { questId } = req.params;
+        const { questionId } = req.params;
         const { text, isCorrect } = req.body;
-        const option = await Option.create({text, isCorrect, questId});
-        res.status(201).json({messaege: "Poszło i odpowiedź done", option});
+        const option = await Option.create({ text, isCorrect, questionId });
+
+        res.status(201).json({ message: "Odpowiedź dodana", data: option });
     } catch (r) {
-        res.status(500).json({mess: "Nie poszło i nie doszło", err: r.message});
+        res.status(500).json({ message: "Nie udało się dodać odpowiedzi", error: r.message });
     }
 };
 
 const getOptionsForQuest = async (req, res) => {
     try {
-        const {questId} = req.params;
-        const options = await Option.findAll({where: {questId}});
+        const { questionId } = req.params;
+        const options = await Option.findAll({ where: { questionId } });
 
-        res.status(200).json(options);
+        res.status(200).json({ data: options });
     } catch (ree) {
-        res.status(500).json({ms: "Nie pobrano pytań", err: ree.message});
+        res.status(500).json({ message: "Nie udało się pobrać odpowiedzi", error: ree.message });
     }
 };
 
