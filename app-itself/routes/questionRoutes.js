@@ -11,7 +11,7 @@ const adaptQuizIdParam = (req, res, next) => {
 
 router.post("/quiz/:quizId", verifyJWT, adaptQuizIdParam, checkOwnership, createQuestion);
 router.get("/quiz/:quizId", getQuestionsForQuiz);
-router.put("/:id", verifyJWT, adaptQuizIdParam, checkQuestionOwnership, updateQuestion);
+router.put("/:id", verifyJWT, updateQuestion);
 router.delete("/:id", verifyJWT, adaptQuizIdParam, checkQuestionOwnership, deleteQuestion);
 
 module.exports = router;

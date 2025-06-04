@@ -10,7 +10,7 @@ const createQuestion = async (req, res) => {
             return res.status(400).json({ message: "Pytanie musi mieć treść." });
         }
 
-        const allowedTypes = ['single', 'multi', 'truefalse', 'open'];
+        const allowedTypes = ["single", "multi", "truefalse", "open"];
         if (type && !allowedTypes.includes(type)) {
             return res.status(400).json({ message: "Nieprawidłowy typ pytania." });
         }
@@ -18,7 +18,7 @@ const createQuestion = async (req, res) => {
         const question = await Question.create({
             text,
             quizId,
-            type: type || 'single',
+            type: type || "single",
             points: points || 1,
             hint: hint || null
         });
@@ -43,18 +43,27 @@ const getQuestionsForQuiz = async (req, res) => {
 const updateQuestion = async (req, res) => {
     try {
         const {id} = req.params;
-        const question = await Question.findByPk(id);
-
+        console.log("bubuubub oto id:", id);
+        
+        const question = await Question.findByPk(Number(id));
+        console.log("znalezioneee", question);
+        
         if (!question) {
             return res.status(404).json({message: "Nie ma takiego pytania"});
         }
 
         const {text, type, points, hint} = req.body;
-        if (type && !['single', "multi", "truefalse", "open"].includes(type)) {
+        if (type && !["single", "multi", "truefalse", "open"].includes(type)) {
             return res.status(400).json({message: "Niepoprawny typ pytania"});
         }
 
-        await question.update({text, type, points, hint});
+        const updateData = {};
+        if (text !== undefined) updateData.text = text;
+        if (type !== undefined) updateData.type = type;
+        if (points !== undefined) updateData.points = points;
+        if (hint !== undefined) updateData.hint = hint;
+
+        await question.update(updateData);
         res.status(200).json({message: "pytanie zostało zaktualizowane", question});
     } catch (err) {
         res.status(500).json({message: "Błąd przy aktualizacji pytania", error: err.message});
@@ -75,6 +84,6 @@ const deleteQuestion = async (req, res) => {
     } catch (err) {
         res.status(500).json({message: "Błąd przy usuwaniu pyrtania", error: err.message});
     }
-}
+};
 
 module.exports = {createQuestion, getQuestionsForQuiz, updateQuestion, deleteQuestion};

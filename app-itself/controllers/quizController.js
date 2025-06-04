@@ -1,12 +1,14 @@
-const Quiz = require("../models/quizModelel");
 const { Op } = require("sequelize");
-const Tag = require("../models/tag");
+const seq = require("../config/sequelize");
 const QuizSession = require("../models/quizSessionModel");
+const { Quiz, Tag, QuizTag, Category, Option, Question } = require("../config/index");
 
 const createQuiz = async (req, res) => {
     try {
         const { title, description, isPublic, tags, categoryId, difficulty, duration, language } = req.body;
 
+        console.log("REQ BODY", req.body);
+        console.log("REQ USER", req.user);
         if (!title || !description) {
             return res.status(400).json({message: "Wymagane są tytuł i opis"});
         }
@@ -20,30 +22,52 @@ const createQuiz = async (req, res) => {
             return res.status(400).json({ message: "Czas trwania musi być liczbą dodatnią (podaj w minutach)" });
         }
 
-        await sequelize.transaction(async (t) => {
-        const quizik = await Quiz.create({
-            title,
-            description,
-            isPublic,
-            authorId: req.user.userId,
-            categoryId,
-            difficulty,
-            duration,
-            language}, { transaction: t });
+        let fullQuiz;
 
-        if (tags?.length) {
-            const tagRecords = await Promise.all(tags.map(name =>
-            Tag.findOrCreate({ where: { name }, transaction: t })
-            ));
-            await quizik.setTags(tagRecords.map(([tag]) => tag), { transaction: t });
-        }
+        await seq.transaction(async (t) => {
 
-        res.status(201).json({ message: "Quiz utworzony", quizik });
+            const quizik = await Quiz.create({
+                title,
+                description,
+                isPublic,
+                authorId: req.user.userId,
+                categoryId,
+                difficulty,
+                duration,
+                language
+            }, { transaction: t });
+            console.log("typeof quizik.setTags:", typeof quizik.addTags);
+
+
+            if (tags && Array.isArray(tags)) {
+
+                const tagInstances = await Promise.all(
+                    tags.map(async (name) => {
+                        const [tag] = await Tag.findOrCreate({
+                            where: { name },
+                            transaction: t
+                        });
+                        return tag;
+                    })
+                );
+
+                await quizik.setTags(tagInstances, { transaction: t });
+            }
+
+            fullQuiz = await Quiz.findByPk(quizik.id, {
+                include: Tag,
+                transaction: t
+            });
+
         });
 
+        if (!fullQuiz) {
+            return res.status(500).json({ message: "Quiz utworzono, ale nie udało się go pobrać z tagami" });
+        }
 
-        
-        res.status(201).json({ message: "Quiz został stworzony, mój Panie...", quizik });
+        res.status(201).json({ message: "Quiz utworzony", fullQuiz });
+
+
     } catch (erer) {
         res.status(500).json({message: "coś tu poszło mocno nie tak :3", err: erer.message});
     }
@@ -51,9 +75,21 @@ const createQuiz = async (req, res) => {
 
 const getQuizById = async (req, res) => {
     try {
-        const quiz = await Quiz.findByPk(req.params.id);
+        const quiz = await Quiz.findByPk(req.params.id, {
+            include: [
+                { model: Tag },
+                {
+                model: Question,
+                include: [{ model: Option }]
+                }
+            ]
+        });
         if (!quiz) {
             return res.status(404).json({message: "Nie znaleziono takiego quizu"});
+        }
+
+        if (!quiz.isPublic && quiz.authorId !== req.user?.userId && req.user?.role !== "admin") {
+            return res.status(403).json({ message: "Brak dostępu do tego quizu" });
         }
     
         res.status(200).json({quiz});
@@ -65,12 +101,19 @@ const getQuizById = async (req, res) => {
 const getAllOfTheQuizzyWizzy = async (req, res) => {
     try {
         const { categoryId, difficulty, language, tags, sort, page = 1, limit = 10 } = req.query;
-
         const where = {};
         const include = [];
         if (categoryId) where.categoryId = categoryId;
         if (difficulty) where.difficulty = difficulty;
         if (language) where.language = language;
+
+        if (req.query.q) {
+            where[Op.or] = [
+                { title: { [Op.like]: `%${req.query.q}%` } },
+                { description: { [Op.like]: `%${req.query.q}%` } }
+            ];
+        }
+
 
         if (tags) {
             const tagArray = Array.isArray(tags) ? tags : tags.split(",");
@@ -79,7 +122,6 @@ const getAllOfTheQuizzyWizzy = async (req, res) => {
                 where: { name: tagArray.length === 1 ? tagArray[0] : { [Op.in]: tagArray } }
             });
         }
-
 
         const offset = (parseInt(page) - 1) * parseInt(limit);
 
@@ -92,7 +134,6 @@ const getAllOfTheQuizzyWizzy = async (req, res) => {
             (userId && quiz.authorId === userId) ||
             (userId && Array.isArray(quiz.sharedWith) && quiz.sharedWith.includes(userId))
         );
-
 
         let quizzesWithPopularity = await Promise.all(
             baseQuizzes.map(async (quiz) => {
@@ -109,9 +150,7 @@ const getAllOfTheQuizzyWizzy = async (req, res) => {
             const field = sort.replace("-", "");
 
             quizzesWithPopularity.sort((a, b) => {
-                if (field === "popularity") {
-                    return direction * (b.popularity - a.popularity);
-                }
+                if (field === "popularity") return direction * (b.popularity - a.popularity);
                 if (a[field] < b[field]) return -1 * direction;
                 if (a[field] > b[field]) return 1 * direction;
                 return 0;
@@ -214,6 +253,10 @@ const shareQuizWithUser = async (req, res) => {
     }
 };
 
+const test = (req, res) => {
+    console.log("oto testus testorum");
+    res.status(200).json({message: "kupa"})
+};
 
 module.exports = { createQuiz, getAllOfTheQuizzyWizzy, getQuizById, updateQuiz, deletusQuizus, getQuizzesSharedToMe, shareQuizWithUser };
 

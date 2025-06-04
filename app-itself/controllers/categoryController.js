@@ -13,7 +13,7 @@ const createCategory = async (req, res) => {
 const getAllCats = async (req, res) => {
     try {
         const categories = await Category.findAll();
-        res.json(categories)
+        res.json(categories);
     } catch (err) {
         res.status(500).json({message: "Błąd przy pobieraniu kategorii", error: err.message});
     }
@@ -45,7 +45,7 @@ const deleteCat = async (req, res) => {
 
         await category.destroy();
         res.json({message: `usunięto kategorię o id ${id}`});
-    } catch {
+    } catch (err) {
         res.status(500).json({message: "Błąd przy aborcji", error: err.message});
     }
 };

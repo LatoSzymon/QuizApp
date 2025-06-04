@@ -13,7 +13,7 @@ const Question = seq.define("Question", {
     type: {
         type: DataTypes.ENUM("single", "multi", "truefalse", "open"),
         allowNull: false,
-        defaultValue: 'multi'
+        defaultValue: "multi"
     },
     points: {
         type: DataTypes.INTEGER,

@@ -11,7 +11,7 @@ const Category = seq.define("Category", {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-            model: "Categories",
+            model: "categories",
             key: "id"
         }
     }

@@ -1,4 +1,4 @@
-const Tag = require("../models/tag");
+const { Quiz, Tag } = require("../config/index");
 
 const createTag = async (req, res) => {
     try {
@@ -23,7 +23,7 @@ const deleteTagussy = async (req, res) => {
         const tag = await Tag.findByPk(req.params.id);
 
         if (!tag) {
-            return res.status(404).json({message: "Nie udało się pobrać tagu"})
+            return res.status(404).json({message: "Nie udało się pobrać tagu"});
         }
 
         await tag.destroy();

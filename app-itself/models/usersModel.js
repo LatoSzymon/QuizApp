@@ -25,8 +25,8 @@ const User = seq.define("User", {
         allowNull: false
     },
     role: {
-        type: DataTypes.ENUM('user', 'admin'),
-        defaultValue: 'user'
+        type: DataTypes.ENUM("user", "admin"),
+        defaultValue: "user"
     },
     authProvider: {
         type: DataTypes.STRING,
@@ -50,10 +50,14 @@ const User = seq.define("User", {
     }
 }, {
   indexes: [
-    { fields: ['email'] },
-    { fields: ['username'] },
-    { fields: ['totalScore'] },
-    { fields: ['role', 'authProvider'] }
+    { fields: ["email"] },
+    {
+        unique: true,
+        fields: ["username"],
+        name: "unique_username_idx"
+    },
+    { fields: ["totalScore"] },
+    { fields: ["role", "authProvider"] }
   ]
 });
 

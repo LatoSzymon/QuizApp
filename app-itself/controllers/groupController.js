@@ -2,7 +2,7 @@ const Group = require("../models/group");
 const GroupMembership = require("../models/groupMembership");
 const GroupQuiz = require("../models/groupQuiz");
 const User = require("../models/usersModel");
-const Quiz = require("../models/quizModelel");
+const { Quiz } = require("../config/index");
 
 const createGroup = async (req, res) => {
     try {

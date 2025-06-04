@@ -11,7 +11,7 @@ const Rating = sequelize.define("Rating", {
         allowNull: false
     },
     score: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT,
         allowNull: false,
         validate: {
             min: 1,

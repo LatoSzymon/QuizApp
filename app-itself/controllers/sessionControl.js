@@ -56,7 +56,7 @@ const answerQuestion = async (req, res) => {
 
             case "multi":
                 if (!Array.isArray(selected) || selected.length < 2) {
-                    return res.status(404).json({message: "Więcej niż jedna odpowiedź wymaga wybrania"})
+                    return res.status(404).json({message: "Więcej niż jedna odpowiedź wymaga wybrania"});
                 }
                 break;
 
@@ -187,7 +187,7 @@ const theCompletionus = async (req, res) => {
                     description: "Rozwiązałeś 100 quizów na przynajmniej 80%. Czas dotknąć trawy",
                     quizId: quizId,
                     date: new Date().toISOString()
-                })
+                });
             }
 
             if (session.percentage >= 80 && minutesDiff <= 3 && !badges.find(a => a.name === "I AM SPEEEED")) {
@@ -208,7 +208,7 @@ const theCompletionus = async (req, res) => {
 
 const getSessionById = async (req, res) => {
     try {
-        const sessionId = req.params.id
+        const sessionId = req.params.id;
         const session = await QuizSession.findById(sessionId);
         if (!session) {
             return res.status(404).json({message: "taka ssesja nie istnieje. Tak jak twoja mama lol"});

@@ -5,7 +5,8 @@ const connectMDB = async () => {
     try {
         await amongus.connect(process.env.MONGO_URI, {
             useNewUrlParser: true,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
+            maxPoolSize: 10
         });
 
         console.log("No i elegancko wszystko śmiga z MongoDB");

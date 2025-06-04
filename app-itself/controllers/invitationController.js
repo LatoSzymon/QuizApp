@@ -1,5 +1,5 @@
 const QuizInvitation = require("../models/quizInvitation");
-const Quiz = require("../models/quizModelel");
+const {Quiz} = require("../config/index");
 const User = require("../models/usersModel");
 
 const sendInvitation = async (req, res) => {

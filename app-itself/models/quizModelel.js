@@ -20,17 +20,17 @@ const Quiz = seq.define("Quiz", {
         allowNull: false
     },
     categoryId: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: true,
         references: {
             model: "categories",
             key: "id"
-        }
+        },
     },
     difficulty: {
-        type: DataTypes.ENUM('easy', 'medium', 'hard'),
+        type: DataTypes.ENUM("easy", "medium", "hard"),
         allowNull: false,
-        defaultValue: 'medium'
+        defaultValue: "medium"
     },
     duration: {
         type: DataTypes.INTEGER,
@@ -49,17 +49,16 @@ const Quiz = seq.define("Quiz", {
     tableName: "quizzes",
     timestamps: true,
     indexes: [
-        { fields: ['authorId'] },
-        { fields: ['categoryId'] },
-        { fields: ['difficulty'] },
-        { fields: ['isPublic'] },
-        { fields: ['language'] }
+        { fields: ["authorId"] },
+        { fields: ["categoryId"] },
+        { fields: ["difficulty"] },
+        { fields: ["isPublic"] },
+        { fields: ["language"] }
     ]
 
 });
 
-Quiz.belongsTo(Category, { foreignKey: 'categoryId' });
-
+Quiz.belongsTo(Category, { foreignKey: "categoryId" });
 
 
 module.exports = Quiz;

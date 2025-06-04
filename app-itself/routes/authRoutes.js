@@ -5,9 +5,16 @@ const { verifyJWT } = require("../middleware/userMiddleware");
 const passport = require("passport");
 require("../config/passportGoogle");
 const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
+
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 3,
+    message: "Za dużo nieudanych logowań! Ponowna próba za 15 minut"
+});
 
 router.post("/register", rejestracja);
-router.post("/login", login);
+router.post("/login", loginLimiter, login);
 router.get("/me", verifyJWT, (req, res) => {
     res.json({message: "Token działa", user: req.user});
 });
@@ -20,7 +27,7 @@ router.get("/google/callback", passport.authenticate("google", {session: false})
     const token = jwt.sign(
         { userId: user.id, role: user.role, username: user.username },
         process.env.JWT_SECRET,
-        { expiresIn: '1h' }
+        { expiresIn: "1h" }
     );
 
     res.json({ token, user });

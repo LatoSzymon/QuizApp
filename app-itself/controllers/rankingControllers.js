@@ -1,5 +1,5 @@
 const User = require("../models/usersModel");
-const Quiz = require("../models/quizModelel");
+const { Quiz } = require("../config/index");
 const QuizSession = require("../models/quizSessionModel");
 const { Op } = require("sequelize");
 
@@ -64,7 +64,7 @@ const tagRanging = async (req, res) => {
         const sessions = await QuizSession.find({ quizId: { $in: quizIds}, isCompleted: true});
         const userPoints = {};
 
-        for (const s in sessions) {
+        for (const s of sessions) {
             if (!userPoints[s.userId]) {
                 userPoints[s.userId] = 0;
             }
@@ -80,7 +80,7 @@ const tagRanging = async (req, res) => {
             return {userId, username: user?.username || "Nieznany Użytkownik", Score: score};
         }));
 
-        res.json(result)
+        res.json(result);
     } catch (error) {
         res.status(500).json({message: "Nie udało się zrobić rankingu po tagach", error: error.message});
     }
@@ -90,7 +90,7 @@ const catRanking = async (req, res) => {
         try {
         const {categoryId} = req.params;
         const matching = await Quiz.findAll({
-            where: { categoryId: {categoryId}},
+            where: { categoryId: categoryId},
             attributes: ["id"]
         });
 
@@ -98,7 +98,7 @@ const catRanking = async (req, res) => {
         const sessions = await QuizSession.find({ quizId: { $in: quizIds}, isCompleted: true});
         const userPoints = {};
 
-        for (const s in sessions) {
+        for (const s of sessions) {
             if (!userPoints[s.userId]) {
                 userPoints[s.userId] = 0;
             }
@@ -114,10 +114,10 @@ const catRanking = async (req, res) => {
             return {userId, username: user?.username || "Nieznany Użytkownik", Score: score};
         }));
 
-        res.json(result)
+        res.json(result);
     } catch (error) {
         res.status(500).json({message: "Nie udało się zrobić rankingu po kategoriach", error: error.message});
     }
-}
+};
 
 module.exports = {getGlobalRanking, getWeeklyRanking, tagRanging, catRanking};

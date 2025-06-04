@@ -1,7 +1,6 @@
 const QuizSession = require("../models/quizSessionModel");
-const Quiz = require("../models/quizModelel");
-const Tag = require("../models/tag");
-const Category = require("../models/category");
+const { Quiz, Tag, QuizTag, Category, Option, Question } = require("../config/index");
+
 
 const getUserStatsSummary = async (req, res) => {
     try {
@@ -13,7 +12,7 @@ const getUserStatsSummary = async (req, res) => {
         }
 
         const totalSessions = sessions.length;
-        const average = Math.round(sessions.reduce((sum, s) => sum + s.percentage, 0) / totalSessions);
+        const avgScore = Math.round(sessions.reduce((sum, s) => sum + s.percentage, 0) / totalSessions);
 
         const quizIds = [...new Set(sessions.map(s => s.quizId))];
         const quizzes = await Quiz.findAll({
@@ -38,7 +37,7 @@ const getUserStatsSummary = async (req, res) => {
         for (const s of sessions) {
             const quizInfo = quizMap[s.quizId];
             if (!quizInfo) {
-                continue
+                continue;
             }
 
             completedQuizzes.push({

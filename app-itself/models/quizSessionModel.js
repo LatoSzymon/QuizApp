@@ -48,4 +48,4 @@ const QuizSessionSchema = new mongoBongo.Schema({
     timestamps: true
 });
 
-module.exports = mongoBongo.model("QuizzSession", QuizSessionSchema);
+module.exports = mongoBongo.model("QuizSession", QuizSessionSchema);

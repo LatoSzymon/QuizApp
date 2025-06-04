@@ -1,18 +1,19 @@
-const Quiz = require("../models/quizModelel");
-const Question = require("../models/Question");
+const { Quiz, Tag, QuizTag, Category, Option, Question } = require("../config/index");
 
 const checkOwnership = async (req, res, next) => {
     try {
         const quId = req.params.id;
-        const userId = req.user.userId;
+        const userId = Number(req.user.userId);
         const usrRole = req.user.role;
-
+        
         const quiz = await Quiz.findByPk(quId);
+        console.log("quiz.authorId:", quiz.authorId, "userId:", userId, "role:", usrRole);
+
         if (!quiz) {
             return res.status(404).json({msg: "W Ba Sing Se nie ma takiego quizu"});
         }
 
-        if (quiz.authorId === userId || usrRole === 'admin') {
+        if (quiz.authorId === userId || usrRole === "admin") {
             next();
         } else {
             return res.status(403).json({message: "brak uprawnień UwU"});
@@ -25,17 +26,33 @@ const checkOwnership = async (req, res, next) => {
 
 const checkQuestionOwnership = async (req, res, next) => {
     try {
-        const {questionId} = req.params;
+        const questionId = req.params.id;
+        console.log("checkQuestionOwnership -> id:", questionId);
+
         const question = await Question.findByPk(questionId);
         if (!question) {
-            return res.status(404).json({message: "Nie znaleziono pytania"});
+            return res.status(404).json({ message: "Nie znaleziono pytania" });
         }
 
-        req.params.id = question.quizId;
+        const quiz = await Quiz.findByPk(question.quizId);
+        const userId = Number(req.user.userId);
+        const usrRole = req.user.role;
 
-        checkOwnership(req, res, next);
+        console.log("quiz.authorId:", quiz?.authorId, "userId:", userId, "role:", usrRole);
+
+        if (!quiz) {
+            return res.status(404).json({ msg: "W Ba Sing Se nie ma takiego quizu" });
+        }
+
+        if (quiz.authorId === userId || usrRole === "admin") {
+            next();
+        } else {
+            return res.status(403).json({ message: "brak uprawnień UwU" });
+        }
+
     } catch (er) {
-        res.status(500).json({msg: "błąd przy sprawdzaniu właściciela pytania", err: er.message});
+        console.error("checkQuestionOwnership err:", er);
+        res.status(500).json({ msg: "błąd przy sprawdzaniu właściciela pytania", err: er.message });
     }
 };
 
