@@ -8,7 +8,7 @@ const getGlobalRanking = async (req, res) => {
         const users = await User.findAll({
             order: [["totalScore", "DESC"]],
             limit: 10,
-            attributes: ["id", ]
+            attributes: ["id", "username", "totalScore"]
         });
 
         res.json(users);

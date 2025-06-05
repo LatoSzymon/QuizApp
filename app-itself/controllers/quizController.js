@@ -84,6 +84,14 @@ const getQuizById = async (req, res) => {
                 }
             ]
         });
+
+        console.log(">>> req.user =", req.user);
+        console.log(">>> quiz.isPublic =", quiz.isPublic);
+        console.log(">>> quiz.authorId =", quiz.authorId);
+        console.log(">>> req.user.userId =", req.user?.userId);
+        console.log(">>> req.user.role =", req.user?.role);
+        console.log(">>> isAdmin?", req.user?.role === "admin");
+
         if (!quiz) {
             return res.status(404).json({message: "Nie znaleziono takiego quizu"});
         }
@@ -211,48 +219,55 @@ const getQuizzesSharedToMe = async (req, res) => {
             }
         });
 
-        const shared = quizzes.filter(q =>
-            Array.isArray(q.sharedWith) &&
-            q.sharedWith.includes(userId)
-        );
+        const shared = quizzes.filter(q => {
+            if (!Array.isArray(q.sharedWith)) {
+                return false;
+            }
+            const recipients = q.sharedWith.map(x => Number(x));
+            return recipients.includes(userId);
+        });
 
-        res.json(shared);
+        return res.status(200).json(shared);
     } catch (err) {
         res.status(500).json({ message: "Błąd przy pobieraniu udostępnionych quizów", error: err.message });
     }
 };
 
 const shareQuizWithUser = async (req, res) => {
-    try {
-        const quiz = await Quiz.findByPk(req.params.id);
-
-        if (!quiz) {
-            return res.status(404).json({ message: "Nie znaleziono quizu" });
-        }
-
-        if (quiz.authorId !== req.user.userId && req.user.role !== "admin") {
-            return res.status(403).json({ message: "Brak uprawnień" });
-        }
-
-        const { userId } = req.body;
-        if (!userId) {
-            return res.status(400).json({ message: "Brak userId" });
-        }
-
-        const shared = Array.isArray(quiz.sharedWith) ? quiz.sharedWith : [];
-        if (!shared.includes(userId)) {
-            shared.push(userId);
-            quiz.sharedWith = shared;
-            await quiz.save();
-        }
-
-        res.json({ message: "Quiz udostępniony użytkownikowi", sharedWith: quiz.sharedWith });
-
-    } catch (err) {
-        res.status(500).json({ message: "Błąd przy udostępnianiu quizu", error: err.message });
+  try {
+    const quiz = await Quiz.findByPk(req.params.id);
+    if (!quiz) {
+      return res.status(404).json({ message: "Nie znaleziono quizu" });
     }
-};
 
+    let { userId } = req.body;
+    if (userId === undefined || userId === null) {
+      return res.status(400).json({ message: "Brak userId w body" });
+    }
+    userId = Number(userId);
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: "Nieprawidłowe userId (powinno być liczbą)" });
+    }
+
+    const shared = Array.isArray(quiz.sharedWith)
+      ? quiz.sharedWith.map(x => Number(x))
+      : [];
+
+    if (!shared.includes(userId)) {
+      shared.push(userId);
+      quiz.sharedWith = shared;
+      await quiz.save();
+    }
+
+    return res.json({
+      message: "Quiz udostępniony użytkownikowi",
+      sharedWith: quiz.sharedWith
+    });
+
+  } catch (err) {
+    return res.status(500).json({ message: "Błąd przy udostępnianiu quizu", error: err.message });
+  }
+};
 const test = (req, res) => {
     console.log("oto testus testorum");
     res.status(200).json({message: "kupa"})

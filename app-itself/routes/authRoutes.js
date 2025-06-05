@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { rejestracja, login, getProfile, updateProfile, forgotPassword, resetPassword } = require("../controllers/usersController");
+const { rejestracja, login, updateProfile, forgotPassword, resetPassword, getFullProfile } = require("../controllers/usersController");
 const { verifyJWT } = require("../middleware/userMiddleware");
 const passport = require("passport");
 require("../config/passportGoogle");
@@ -32,5 +32,8 @@ router.get("/google/callback", passport.authenticate("google", {session: false})
 
     res.json({ token, user });
 });
+router.get("/full-profile", verifyJWT, getFullProfile);
+
+
 
 module.exports = router;

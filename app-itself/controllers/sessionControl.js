@@ -198,6 +198,8 @@ const theCompletionus = async (req, res) => {
                     date: new Date().toISOString()
                 });
             }
+
+            await user.save();
         }
 
         res.status(200).json({message: "pomyślnie zakończono sesję", wynik: score, maxScore: maxScore, percentage: session.percentage, session});

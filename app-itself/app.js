@@ -37,7 +37,7 @@ app.use("/api/quizzes", quizRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/options", optionRoutes);
 app.use("/api/sessions", sessionRoutes);
-app.use("/api/stats", rankRoutes);
+app.use("/api/ranking", rankRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/tags", tagRoutes);
 app.use("/api/stats", statsRoute);

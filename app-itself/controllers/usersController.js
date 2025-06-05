@@ -2,7 +2,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/usersModel");
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 const rejestracja = async (req, res) => {
@@ -47,7 +46,7 @@ const login = async (req, res) => {
             return res.status(401).json({message: "nieprawidłowe hasło"});
         }
 
-        const token = jwt.sign({ userId: user.id, role: user.role, username: user.username }, process.env.JWT_SECRET, {expiresIn: "1h"});
+        const token = jwt.sign({ userId: user.id, role: user.role, username: user.username }, process.env.JWT_SECRET, {expiresIn: "3h"});
 
         res.json({token});
 
@@ -56,20 +55,6 @@ const login = async (req, res) => {
     }
 };
 
-const getProfile = async (req, res) => {
-    try {
-        const user = await User.findByPk(req.user.id, {
-            attributes: ["id", "username", "email", "role"]
-        });
-        if (!user) {
-            return res.status(404).json({message: "Nie znaleziono użytkownika"});
-        }
-        
-        res.json(user);
-    } catch (e) {
-        res.status(500).json({message: "Błąd przy szukaniu użytkownika", err: e.message});
-    }
-};
 
 const updateProfile = async (req, res) => {
     try {
@@ -115,7 +100,9 @@ const forgotPassword = async (req, res) => {
 };
 
 const resetPassword = async (req, res) => {
-    try {    const { token, newPassword } = req.body;
+    try {    
+        console.log(req.body);
+        const { token, newPassword } = req.body;
         const user = await User.findOne({ where: {resetToken: token}});
         if (!user) {
             return res.status(400).json({message: "Nieprawidłowy token. Nie można zresetować hasła"});
@@ -132,6 +119,24 @@ const resetPassword = async (req, res) => {
 
 };
 
+const getFullProfile = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        const user = await User.findByPk(userId, {
+            attributes: { exclude: ["password"] }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: "Nie znaleziono użytkownika" });
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Błąd przy pobieraniu pełnych danych profilu", error: error.message });
+    }
+};
 
 
-module.exports = { rejestracja, login, getProfile, updateProfile, forgotPassword, resetPassword };
+
+module.exports = { rejestracja, login, updateProfile, forgotPassword, resetPassword, getFullProfile };

@@ -2,7 +2,8 @@ const Option = require("../models/options");
 
 const addOption = async (req, res) => {
     try {
-        const { questionId } = req.params;
+        const questionId = req.params.id;
+        console.log(questionId, req.params.id)
         const { text, isCorrect } = req.body;
         const option = await Option.create({ text, isCorrect, questionId });
 
@@ -14,7 +15,9 @@ const addOption = async (req, res) => {
 
 const getOptionsForQuest = async (req, res) => {
     try {
-        const { questionId } = req.params;
+        const {questionId} = req.params;
+        console.log(questionId);
+        
         const options = await Option.findAll({ where: { questionId } });
 
         res.status(200).json({ data: options });

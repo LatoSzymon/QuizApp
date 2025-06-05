@@ -2,7 +2,7 @@ const { Quiz, Tag, QuizTag, Category, Option, Question } = require("../config/in
 
 const checkOwnership = async (req, res, next) => {
     try {
-        const quId = req.params.id;
+        const quId = req.params.quizIdFromQuestion || req.params.id;
         const userId = Number(req.user.userId);
         const usrRole = req.user.role;
         
@@ -27,14 +27,14 @@ const checkOwnership = async (req, res, next) => {
 const checkQuestionOwnership = async (req, res, next) => {
     try {
         const questionId = req.params.id;
-        console.log(questionId);
+        console.log("sprawdzamy pytanie o id: ",questionId);
         
         const question = await Question.findByPk(questionId);
         if (!question) {
             return res.status(404).json({message: "Nie znaleziono pytania"});
         }
 
-        req.params.id = question.quizId;
+        req.params.quizIdFromQuestion = question.quizId;
 
         return checkOwnership(req, res, next);
     } catch (er) {

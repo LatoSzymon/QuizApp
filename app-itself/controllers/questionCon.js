@@ -86,4 +86,15 @@ const deleteQuestion = async (req, res) => {
     }
 };
 
-module.exports = {createQuestion, getQuestionsForQuiz, updateQuestion, deleteQuestion};
+const getAllQest = async (req, res) => {
+    try {
+        const questions = await Question.findAll();
+        res.json(questions);
+    } catch (err) {
+        res.status(500).json({
+            message: "Nie udała się akcja ratunkowa", error: err.message
+        });
+    }
+};
+
+module.exports = {createQuestion, getQuestionsForQuiz, updateQuestion, deleteQuestion, getAllQest};
